@@ -20,7 +20,7 @@ def main():
     ap.add_argument("--ado-org", default=Settings.ADO_ORG)
     ap.add_argument("--ado-project", default=Settings.ADO_PROJECT)
     ap.add_argument("--ado-repo", required=False, help="One or more repos (comma or space separated)")
-    ap.add_argument("--workspace", required=False, default=os.getcwd() help="Directory where code changes should be applied")
+    ap.add_argument("--workspace", required=False, default=os.getcwd(), help="Directory where code changes should be applied")
     args = ap.parse_args()
 
     ado_repos = _parse_repos(args.ado_repo or Settings.ADO_REPO or "")
