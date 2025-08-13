@@ -1,0 +1,7 @@
+# Place at $HOME/.codex/config.toml locally, or copy into CI user's home.
+
+[mcp_servers.ado]
+command = "npx"
+args = ["-y", "@azure-devops/mcp", "${ADO_ORG}"]  # ADO_ORG from env
+stdio = true
+enabled = true

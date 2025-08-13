@@ -1,0 +1,2 @@
+python-dotenv
+jira>=3.6
