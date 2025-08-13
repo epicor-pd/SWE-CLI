@@ -1,4 +1,4 @@
-import argparse, json, logging
+import argparse, json, logging, os
 from pathlib import Path
 from .config import Settings
 from .logging_setup import configure_logging
@@ -20,6 +20,7 @@ def main():
     ap.add_argument("--ado-org", default=Settings.ADO_ORG)
     ap.add_argument("--ado-project", default=Settings.ADO_PROJECT)
     ap.add_argument("--ado-repo", required=False, help="One or more repos (comma or space separated)")
+    ap.add_argument("--workspace", required=False, default=os.getcwd() help="Directory where code changes should be applied")
     args = ap.parse_args()
 
     ado_repos = _parse_repos(args.ado_repo or Settings.ADO_REPO or "")
@@ -36,7 +37,8 @@ def main():
     prompt = prompt.replace("{{JIRA_JSON}}", json.dumps(issue, indent=2))
     prompt = prompt.replace("{{CONTEXT_INSTRUCTIONS}}", ctx)
 
-    exit(run_codex(prompt))
+    ws = Path(args.workspace).expanduser().resolve()
+    exit(run_codex(prompt, ws))
 
 if __name__ == "__main__":
     main()
