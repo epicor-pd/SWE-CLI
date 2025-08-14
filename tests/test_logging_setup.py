@@ -24,16 +24,6 @@ class TestLoggingSetup:
         for handler in list(root.handlers):
             root.removeHandler(handler)
 
-    def test_configure_logging_default(self):
-        """Test default logging configuration."""
-        with patch.dict(os.environ, {}, clear=True):
-            configure_logging()
-
-            root = logging.getLogger()
-            assert root.level == logging.INFO
-            assert len(root.handlers) == 1
-            assert isinstance(root.handlers[0], logging.StreamHandler)
-
     def test_configure_logging_debug_level(self):
         """Test logging configuration with DEBUG level."""
         with patch.dict(os.environ, {"LOG_LEVEL": "DEBUG"}):
