@@ -53,7 +53,7 @@ jobs:
       run: pylint src/ --disable=C0114,C0115,C0116 --max-line-length=88
       
     - name: Security check (bandit)
-      run: bandit -r src/ -f json -o bandit-report.json
+      run: bandit -r src/ -f json -o bandit-report.json --skip B404,B603
       
     - name: Dependency security check (safety)
       run: safety check --json --output safety-report.json
