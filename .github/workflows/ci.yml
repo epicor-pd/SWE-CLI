@@ -9,7 +9,7 @@ on:
     types: [ published ]
 
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
 
 jobs:
   lint:
@@ -74,15 +74,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         exclude:
           # Reduce matrix for faster builds on non-main branches
           - os: macos-latest
-            python-version: "3.8"
-          - os: macos-latest
             python-version: "3.9"
-          - os: windows-latest
-            python-version: "3.8"
           - os: windows-latest
             python-version: "3.9"
     
