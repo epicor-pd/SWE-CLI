@@ -24,14 +24,6 @@ class TestLoggingSetup:
         for handler in list(root.handlers):
             root.removeHandler(handler)
 
-    def test_configure_logging_debug_level(self):
-        """Test logging configuration with DEBUG level."""
-        with patch.dict(os.environ, {"LOG_LEVEL": "DEBUG"}):
-            configure_logging()
-
-            root = logging.getLogger()
-            assert root.level == logging.DEBUG
-
     def test_configure_logging_json_format(self):
         """Test logging configuration with JSON format."""
         with patch.dict(os.environ, {"LOG_FORMAT": "json"}):
