@@ -177,9 +177,41 @@ SweCli/
 ```
 
 ### Running Tests
+
+#### Local Development
 ```bash
-# Add test commands here when test suite is implemented
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Run all tests
+pytest
+
+# Run tests with coverage
+pytest --cov=src --cov-report=html
+
+# Run specific test categories
+pytest -m unit          # Unit tests only
+pytest -m integration   # Integration tests only
+pytest -m "not slow"    # Skip slow tests
+
+# Run linting and formatting
+black src/ tests/
+isort src/ tests/
+flake8 src/ tests/
+mypy src/
+pylint src/
 ```
+
+#### CI/CD Pipeline
+The project uses GitHub Actions for continuous integration with the following jobs:
+
+- **Code Quality & Linting**: Black, isort, flake8, mypy, pylint, bandit, safety
+- **Test Suite**: Multi-platform testing (Ubuntu, Windows, macOS) across Python 3.8-3.12
+- **Integration Tests**: Real MCP server testing on main branch
+- **Build**: Package building and validation
+- **Docker**: Multi-architecture container builds
+- **Security Scanning**: Trivy vulnerability scanning
+- **Release**: Automated PyPI publishing on releases
 
 ## Security Considerations
 
