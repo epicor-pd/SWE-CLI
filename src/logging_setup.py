@@ -1,5 +1,15 @@
-import logging, os, sys, json
-from typing import Optional
+import json
+import logging
+import os
+import sys
+
+
+class _ConfigurationState:
+    configured = False
+
+
+_state = _ConfigurationState()
+
 
 def _json_formatter(record: logging.LogRecord) -> str:
     payload = {
@@ -15,9 +25,11 @@ def _json_formatter(record: logging.LogRecord) -> str:
         payload["exc_info"] = logging.Formatter().formatException(record.exc_info)
     return json.dumps(payload, ensure_ascii=False)
 
+
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         return _json_formatter(record)
+
 
 def configure_logging() -> None:
     """
@@ -27,7 +39,7 @@ def configure_logging() -> None:
       LOG_FORMAT=json|plain (default plain)
       LOG_FILE=/path/to/file.log (optional; if set, also logs to file)
     """
-    if getattr(configure_logging, "_configured", False):
+    if _state.configured:
         return
 
     level = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -46,18 +58,22 @@ def configure_logging() -> None:
     if fmt == "json":
         ch.setFormatter(JsonFormatter())
     else:
-        ch.setFormatter(logging.Formatter(
-            "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-        ))
+        ch.setFormatter(
+            logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+        )
     root.addHandler(ch)
 
     # Optional file handler
     if log_file:
         fh = logging.FileHandler(log_file, encoding="utf-8")
         fh.setLevel(level)
-        fh.setFormatter(JsonFormatter() if fmt == "json" else logging.Formatter(
-            "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-        ))
+        fh.setFormatter(
+            JsonFormatter()
+            if fmt == "json"
+            else logging.Formatter(
+                "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+            )
+        )
         root.addHandler(fh)
 
-    configure_logging._configured = True
+    _state.configured = True

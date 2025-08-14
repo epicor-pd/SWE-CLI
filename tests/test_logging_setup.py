@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.logging_setup import configure_logging, JsonFormatter
+from src.logging_setup import configure_logging, JsonFormatter, _state
 
 
 class TestLoggingSetup:
@@ -15,9 +15,8 @@ class TestLoggingSetup:
     
     def teardown_method(self):
         """Reset logging configuration after each test."""
-        # Remove the configured flag to allow reconfiguration
-        if hasattr(configure_logging, '_configured'):
-            delattr(configure_logging, '_configured')
+        # Reset the configured state to allow reconfiguration
+        _state.configured = False
         
         # Clear all handlers from root logger
         root = logging.getLogger()

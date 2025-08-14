@@ -1,9 +1,15 @@
-import json, subprocess, tempfile, os, logging
+import logging
+import os
+import subprocess
 from pathlib import Path
+from typing import Union
+
 from .config import Settings
+
 logger = logging.getLogger(__name__)
 
-def run_codex(prompt_text: str, workspace: str | Path) -> int:
+
+def run_codex(prompt_text: str, workspace: Union[str, Path]) -> int:
     env = os.environ.copy()
     if Settings.OPENAI_API_KEY:
         env["OPENAI_API_KEY"] = Settings.OPENAI_API_KEY
@@ -12,7 +18,14 @@ def run_codex(prompt_text: str, workspace: str | Path) -> int:
     #     f.write(prompt_text)
     #     path = f.name
 
-    cmd = ["codex", "exec", "--full-auto", "--sandbox", "danger-full-access", f"{prompt_text}"]
+    cmd = [
+        "codex",
+        "exec",
+        "--full-auto",
+        "--sandbox",
+        "danger-full-access",
+        f"{prompt_text}",
+    ]
     logger.info("Launching Codex CLI (non-interactive)")
     logger.debug("Codex command: %s", " ".join(cmd))
     rc = subprocess.call(cmd, env=env, cwd=workspace)
