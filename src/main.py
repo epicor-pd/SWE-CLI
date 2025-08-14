@@ -124,6 +124,11 @@ def main() -> None:
             "Generate tests for the requirements in addition to the main implementation"
         ),
     )
+    ap.add_argument(
+        "--additional-instructions",
+        required=False,
+        help="Additional instructions to include in the prompt for Codex",
+    )
     args = ap.parse_args()
 
     ado_repos = _parse_repos(args.ado_repo or Settings.ADO_REPO or "")
@@ -149,10 +154,18 @@ def main() -> None:
     prompt = prompt.replace("{{JIRA_JSON}}", json.dumps(issue, indent=2))
     prompt = prompt.replace("{{CONTEXT_INSTRUCTIONS}}", ctx)
 
+    # Add additional instructions if provided
+    additional_instructions = args.additional_instructions or ""
+    prompt = prompt.replace("{{ADDITIONAL_INSTRUCTIONS}}", additional_instructions)
+
     # Estimate and manage prompt size to fit within context window
     logger.info("Managing prompt size for model: %s", Settings.MODEL_NAME)
     jira_json = json.dumps(issue, indent=2)
-    estimated_tokens = estimate_prompt_tokens(jira_json, ctx, prompt)
+    # Include additional instructions in token estimation
+    additional_instructions_for_estimation = args.additional_instructions or ""
+    estimated_tokens = estimate_prompt_tokens(
+        jira_json, ctx + additional_instructions_for_estimation, prompt
+    )
     logger.info("Estimated prompt tokens before processing: %d", estimated_tokens)
 
     # Apply context window management

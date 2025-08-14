@@ -8,6 +8,8 @@ You are an engineering agent. Implement the change requested by the Jira ticket 
 {{CONTEXT_INSTRUCTIONS}}
 </CONTEXT_INSTRUCTIONS>
 
+{{ADDITIONAL_INSTRUCTIONS}}
+
 Requirements:
 - Follow repo conventions and tests.
 - Generate the code based on Jira requirement. 

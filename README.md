@@ -142,6 +142,7 @@ python -m src.main --jira EP-1234 --ado-repo "frontend-app,backend-api"
 - `--ado-repo`: Comma or space-separated list of repositories to analyze
 - `--workspace`: Directory where code changes should be applied (defaults to current directory)
 - `--generate-tests`: Generate comprehensive tests for the requirements in addition to the main implementation
+- `--additional-instructions`: Additional instructions to include in the prompt for Codex
 
 ### Example Workflow
 
@@ -155,11 +156,22 @@ python -m src.main --jira EP-1234 --ado-repo "frontend-app,backend-api"
    python -m src.main --jira PROJ-123 --ado-repo "web-app,api-service" --generate-tests
    ```
 
-3. **The tool will**:
+3. **Implementation with Additional Instructions**: 
+   ```bash
+   python -m src.main --jira PROJ-123 --ado-repo "web-app,api-service" --additional-instructions "Use TypeScript strict mode and ensure all functions have JSDoc comments"
+   ```
+
+4. **Implementation with Test Generation and Additional Instructions**: 
+   ```bash
+   python -m src.main --jira PROJ-123 --ado-repo "web-app,api-service" --generate-tests --additional-instructions "Focus on performance optimization and include benchmarks in tests"
+   ```
+
+5. **The tool will**:
    - Connect to Jira and fetch issue PROJ-123
    - Generate Azure DevOps context for web-app and api-service repositories
    - Create a comprehensive prompt with issue details and repository context
    - If `--generate-tests` is specified, use the enhanced prompt template for test generation
+   - If `--additional-instructions` is provided, include those instructions in the prompt for Codex
    - Execute Codex CLI to implement the changes (and tests if requested)
    - Apply changes directly to the specified workspace
 

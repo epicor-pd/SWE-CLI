@@ -1,15 +1,17 @@
 """Tests for context window management functionality."""
 
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from src.config import Settings
-from src.mcp_output_utils import (
-    count_tokens,
-    get_context_window_limit,
-    estimate_prompt_tokens,
-    CONTEXT_WINDOW_LIMITS,
-)
 from src.main import _manage_prompt_size
+from src.mcp_output_utils import (
+    CONTEXT_WINDOW_LIMITS,
+    count_tokens,
+    estimate_prompt_tokens,
+    get_context_window_limit,
+)
 
 
 class TestTokenCounting:
@@ -19,7 +21,7 @@ class TestTokenCounting:
         """Test basic token counting."""
         text = "Hello world, this is a test."
         tokens = count_tokens(text)
-        
+
         # Should return a reasonable number of tokens
         assert isinstance(tokens, int)
         assert tokens > 0
@@ -30,7 +32,7 @@ class TestTokenCounting:
         text = "Hello world, this is a test."
         gpt4_tokens = count_tokens(text, "gpt-4")
         claude_tokens = count_tokens(text, "claude-3-sonnet")
-        
+
         assert isinstance(gpt4_tokens, int)
         assert isinstance(claude_tokens, int)
         assert gpt4_tokens > 0
@@ -53,9 +55,11 @@ class TestTokenCounting:
         jira_content = '{"issue": "EP-1234", "summary": "Test issue"}'
         context_instructions = "Repository analysis for project..."
         prompt_template = "You are an engineering agent..."
-        
-        tokens = estimate_prompt_tokens(jira_content, context_instructions, prompt_template)
-        
+
+        tokens = estimate_prompt_tokens(
+            jira_content, context_instructions, prompt_template
+        )
+
         assert isinstance(tokens, int)
         assert tokens > 0
 
@@ -66,36 +70,36 @@ class TestPromptSizeManagement:
     def test_manage_prompt_size_small_prompt(self):
         """Test that small prompts are not modified."""
         small_prompt = "This is a small prompt that should not be truncated."
-        
-        with patch.object(Settings, 'MODEL_NAME', 'gpt-4'):
-            with patch.object(Settings, 'MAX_CONTEXT_TOKENS', 0):
-                with patch.object(Settings, 'CONTEXT_SAFETY_MARGIN', 0.8):
+
+        with patch.object(Settings, "MODEL_NAME", "gpt-4"):
+            with patch.object(Settings, "MAX_CONTEXT_TOKENS", 0):
+                with patch.object(Settings, "CONTEXT_SAFETY_MARGIN", 0.8):
                     result = _manage_prompt_size(small_prompt, "gpt-4")
-        
+
         assert result == small_prompt
 
     def test_manage_prompt_size_large_prompt(self):
         """Test that large prompts are truncated."""
         # Create a very large prompt that would exceed token limits
         large_prompt = "This is a test line.\n" * 10000  # ~50KB of text
-        
-        with patch.object(Settings, 'MODEL_NAME', 'gpt-4'):
-            with patch.object(Settings, 'MAX_CONTEXT_TOKENS', 1000):  # Force low limit
-                with patch.object(Settings, 'CONTEXT_SAFETY_MARGIN', 0.8):
+
+        with patch.object(Settings, "MODEL_NAME", "gpt-4"):
+            with patch.object(Settings, "MAX_CONTEXT_TOKENS", 1000):  # Force low limit
+                with patch.object(Settings, "CONTEXT_SAFETY_MARGIN", 0.8):
                     result = _manage_prompt_size(large_prompt, "gpt-4")
-        
+
         assert len(result) < len(large_prompt)
         assert "CONTENT" in result  # Should contain truncation/summary marker
 
     def test_manage_prompt_size_with_custom_token_limit(self):
         """Test prompt size management with custom token limit."""
         prompt = "Test prompt content " * 100
-        
-        with patch.object(Settings, 'MODEL_NAME', 'gpt-4'):
-            with patch.object(Settings, 'MAX_CONTEXT_TOKENS', 500):
-                with patch.object(Settings, 'CONTEXT_SAFETY_MARGIN', 0.8):
+
+        with patch.object(Settings, "MODEL_NAME", "gpt-4"):
+            with patch.object(Settings, "MAX_CONTEXT_TOKENS", 500):
+                with patch.object(Settings, "CONTEXT_SAFETY_MARGIN", 0.8):
                     result = _manage_prompt_size(prompt, "gpt-4")
-        
+
         # Should be processed (either truncated or kept as-is)
         assert isinstance(result, str)
         assert len(result) > 0
@@ -107,7 +111,7 @@ class TestContextWindowLimits:
     def test_context_window_limits_exist(self):
         """Test that context window limits are defined for common models."""
         expected_models = ["gpt-4", "gpt-4-32k", "gpt-3.5-turbo", "claude-3-sonnet"]
-        
+
         for model in expected_models:
             assert model in CONTEXT_WINDOW_LIMITS
             assert CONTEXT_WINDOW_LIMITS[model] > 0
