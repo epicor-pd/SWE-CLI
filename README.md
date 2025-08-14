@@ -1,6 +1,6 @@
 # SweCli - Software Engineering CLI Tool
 
-SweCli is an intelligent software engineering automation tool that bridges Jira issue tracking with Azure DevOps repositories using AI-powered code generation. It fetches development tasks from Jira and automatically implements them by leveraging the Codex CLI with Model Context Protocol (MCP) for comprehensive codebase understanding.
+SWE CLI is an intelligent software engineering automation tool that bridges Jira issue tracking with Azure DevOps repositories using AI-powered code generation. It fetches development tasks from Jira and automatically implements them by leveraging the Codex CLI with Model Context Protocol (MCP) for comprehensive codebase understanding.
 
 ## Project Architecture & Design
 
