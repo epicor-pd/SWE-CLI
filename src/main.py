@@ -11,10 +11,10 @@ from .jira_fetch import fetch_issue
 from .logging_setup import configure_logging
 from .mcp_context import build_context_instructions
 from .mcp_output_utils import (
+    RESPONSE_TOKEN_RESERVE,
     count_tokens,
     estimate_prompt_tokens,
     get_context_window_limit,
-    RESPONSE_TOKEN_RESERVE,
     summarize_large_content,
 )
 
@@ -28,16 +28,16 @@ def _parse_repos(val: str) -> list[str]:
 def _manage_prompt_size(prompt: str, model: str) -> str:
     """
     Ensure prompt fits within context window limits.
-    
+
     Args:
         prompt: The full prompt text
         model: The model name to check limits for
-        
+
     Returns:
         Potentially truncated prompt that fits within context limits
     """
     logger = logging.getLogger(__name__)
-    
+
     # Get context window limit with safe handling for mocked values
     try:
         context_limit = Settings.MAX_CONTEXT_TOKENS
@@ -46,7 +46,7 @@ def _manage_prompt_size(prompt: str, model: str) -> str:
     except (TypeError, AttributeError):
         # Handle cases where Settings values are mocked or invalid
         context_limit = get_context_window_limit(model)
-    
+
     # Apply safety margin with safe handling
     try:
         safety_margin = Settings.CONTEXT_SAFETY_MARGIN
@@ -54,42 +54,47 @@ def _manage_prompt_size(prompt: str, model: str) -> str:
             safety_margin = 0.8
     except (TypeError, AttributeError):
         safety_margin = 0.8
-    
+
     usable_tokens = int(context_limit * safety_margin)
     max_prompt_tokens = usable_tokens - RESPONSE_TOKEN_RESERVE
-    
+
     # Count current tokens
     current_tokens = count_tokens(prompt, model)
-    
+
     logger.info(
         "Prompt token analysis: model=%s, limit=%d, usable=%d, current=%d",
-        model, context_limit, usable_tokens, current_tokens
+        model,
+        context_limit,
+        usable_tokens,
+        current_tokens,
     )
-    
+
     if current_tokens <= max_prompt_tokens:
         logger.info("Prompt fits within context window")
         return prompt
-    
+
     logger.warning(
         "Prompt exceeds context window (%d > %d tokens), will truncate",
-        current_tokens, max_prompt_tokens
+        current_tokens,
+        max_prompt_tokens,
     )
-    
+
     # Calculate target length to achieve token limit
     # Use a ratio based approach since token counting might not be exact
     ratio = max_prompt_tokens / current_tokens
     target_char_length = int(len(prompt) * ratio * 0.9)  # Extra safety margin
-    
+
     # Use smart summarization
     truncated_prompt = summarize_large_content(prompt, target_char_length)
-    
+
     # Verify the result
     final_tokens = count_tokens(truncated_prompt, model)
     logger.info(
         "Prompt after truncation: %d tokens (%d characters)",
-        final_tokens, len(truncated_prompt)
+        final_tokens,
+        len(truncated_prompt),
     )
-    
+
     return truncated_prompt
 
 
@@ -115,7 +120,9 @@ def main() -> None:
     ap.add_argument(
         "--generate-tests",
         action="store_true",
-        help="Generate tests for the requirements in addition to the main implementation",
+        help=(  # pylint: disable=line-too-long
+            "Generate tests for the requirements in addition to the main implementation"
+        ),
     )
     args = ap.parse_args()
 
@@ -135,7 +142,9 @@ def main() -> None:
     ctx = build_context_instructions(args.ado_org, args.ado_project, ado_repos)
 
     # Select prompt based on whether test generation is requested
-    prompt_file = "prompts/codegen_with_tests.md" if args.generate_tests else "prompts/codegen.md"
+    prompt_file = (
+        "prompts/codegen_with_tests.md" if args.generate_tests else "prompts/codegen.md"
+    )
     prompt = Path(prompt_file).read_text(encoding="utf-8")
     prompt = prompt.replace("{{JIRA_JSON}}", json.dumps(issue, indent=2))
     prompt = prompt.replace("{{CONTEXT_INSTRUCTIONS}}", ctx)
@@ -145,7 +154,7 @@ def main() -> None:
     jira_json = json.dumps(issue, indent=2)
     estimated_tokens = estimate_prompt_tokens(jira_json, ctx, prompt)
     logger.info("Estimated prompt tokens before processing: %d", estimated_tokens)
-    
+
     # Apply context window management
     managed_prompt = _manage_prompt_size(prompt, Settings.MODEL_NAME)
 

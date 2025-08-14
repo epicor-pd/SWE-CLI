@@ -14,7 +14,7 @@ def build_context_instructions(
         ado_project,
         ",".join(ado_repos),
     )
-    
+
     # Build more focused, token-efficient instructions
     repo_count = len(ado_repos)
     if repo_count == 1:
@@ -24,16 +24,18 @@ Target repo: **{ado_repos[0]}**
 
 Essential MCP commands (use selectively):
 - `mcp_ado_repo_get_repo_by_name_or_id` (project: {ado_project}, repo: {ado_repos[0]})
-- `mcp_ado_repo_search_commits` - Recent changes analysis  
+- `mcp_ado_repo_search_commits` - Recent changes analysis
 - `mcp_ado_repo_list_pull_requests_by_repo` - PR patterns
 - `mcp_ado_search_code` - Target specific modules/tests only
 - `mcp_ado_wit_get_work_item` - If work items linked
 """
     else:
-        repo_names = ", ".join(f"**{r}**" for r in ado_repos[:3])  # Limit displayed repos
+        repo_names = ", ".join(
+            f"**{r}**" for r in ado_repos[:3]
+        )  # Limit displayed repos
         if repo_count > 3:
             repo_names += f" and {repo_count - 3} more"
-            
+
         repo_section = f"""
 **Multi-Repository Analysis** (project: {ado_project}):
 Repos: {repo_names}
@@ -41,7 +43,7 @@ Repos: {repo_names}
 MCP Strategy (be selective to avoid token limits):
 - Focus on primary repo from Jira context
 - Use `mcp_ado_search_code` with specific search terms
-- Limit `repo_list_pull_requests_by_repo` results  
+- Limit `repo_list_pull_requests_by_repo` results
 - Check `repo_get_repo_by_name_or_id` for key repos only
 """
 
@@ -56,7 +58,7 @@ MCP Strategy (be selective to avoid token limits):
 
 **Analysis Priority**:
 1. Understand Jira requirement specifics
-2. Search for existing similar implementations  
+2. Search for existing similar implementations
 3. Identify test patterns and conventions
 4. Review recent PRs in target area
 5. Check for related work items
@@ -64,15 +66,18 @@ MCP Strategy (be selective to avoid token limits):
 **Before Implementation**:
 Summarize: key findings, affected modules, risks, and testing approach.
 """
-    
+
     # Log if instructions are getting large and apply intelligent truncation
     size_info = get_content_size_info(instructions)
-    if size_info['character_count'] > 3000:  # Reduced threshold
+    char_count = size_info["character_count"]
+    if isinstance(char_count, int) and char_count > 3000:  # Reduced threshold
         logger.warning(
-            "Context instructions are large: %d characters for %d repos, applying truncation",
-            size_info['character_count'], len(ado_repos)
+            "Context instructions are large: %d characters for %d repos, "
+            "applying truncation",
+            char_count,
+            len(ado_repos),
         )
         # Apply truncation to keep instructions concise
         instructions = summarize_large_content(instructions, max_length=2500)
-    
+
     return instructions
