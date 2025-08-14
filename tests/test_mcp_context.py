@@ -18,12 +18,13 @@ class TestMCPContext:
         assert "test-org" not in result  # org not included in output
         assert "test-project" in result
         assert "test-repo" in result
-        assert "repo_get_repo_by_name_or_id" in result
-        assert "repo_list_branches_by_repo" in result
-        assert "repo_list_pull_requests_by_project" in result
-        assert "search_code" in result
-        assert "wit_get_work_item" in result
-        assert "Summarize: recent PRs" in result
+        assert "mcp_ado_repo_get_repo_by_name_or_id" in result
+        assert "mcp_ado_repo_search_commits" in result
+        assert "mcp_ado_search_code" in result
+        assert "mcp_ado_wit_get_work_item" in result
+        assert "Summarize: key findings" in result
+        # Check for new context window guidance
+        assert "CRITICAL - Context Window Management" in result
     
     def test_build_context_instructions_multiple_repos(self):
         """Test building context instructions for multiple repositories."""
@@ -36,8 +37,9 @@ class TestMCPContext:
         assert "repo1" in result
         assert "repo2" in result  
         assert "repo3" in result
-        assert result.count("repo_get_repo_by_name_or_id") == 3
-        assert result.count("test-project") >= 3  # Should appear for each repo
+        # With new format, it's a strategy section, not individual commands per repo
+        assert "Multi-Repository Analysis" in result
+        assert "test-project" in result
     
     def test_build_context_instructions_empty_repos(self):
         """Test building context instructions with empty repository list."""
@@ -48,9 +50,11 @@ class TestMCPContext:
         )
         
         # Should still have the summary section
-        assert "Summarize: recent PRs" in result
-        # But no repo-specific instructions
-        assert "repo_get_repo_by_name_or_id" not in result
+        assert "Summarize: key findings" in result
+        # Should have context window guidance even with no repos
+        assert "CRITICAL - Context Window Management" in result
+        # Should handle empty repo list gracefully
+        assert "Multi-Repository Analysis" in result
     
     def test_build_context_instructions_formatting(self):
         """Test that context instructions are properly formatted."""
@@ -66,9 +70,9 @@ class TestMCPContext:
         assert any("**my-repo**" in line for line in lines)
         assert any("(project: my-project)" in line for line in lines)
         
-        # Should have bullet points
+        # Should have bullet points in MCP commands section
         assert any(line.strip().startswith('- ') for line in lines)
         
         # Should end with summary instructions
         assert "Summarize:" in result
-        assert "before coding" in result
+        assert "testing approach" in result

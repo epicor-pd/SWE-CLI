@@ -58,13 +58,35 @@ The tool is designed to work with MCP servers, specifically:
 - **Azure DevOps MCP Server**: Provides repository context, PR analysis, and work item integration
 - **Configuration**: Uses `codex.config.toml` for MCP server setup
 - **Dynamic Context**: Builds repository-specific exploration instructions
+- **Context Window Management**: Intelligent prompt size management to prevent token limit errors
 
-### Prompt Engineering (`prompts/codegen.md`)
+### Context Window Management
 
-The system uses a structured prompt template that:
-- Embeds complete Jira issue information as JSON
-- Includes dynamically generated context instructions
-- Provides clear requirements for code implementation
+SweCli includes sophisticated context window management to prevent "input exceeds context window" errors:
+
+- **Automatic Token Counting**: Uses tiktoken for accurate token estimation across different models
+- **Model-Aware Limits**: Built-in knowledge of context windows for GPT-4, GPT-3.5, Claude 3, and other models
+- **Intelligent Truncation**: Smart content summarization that preserves important information
+- **Configurable Safety Margins**: Adjustable limits to ensure prompts fit comfortably
+- **MCP Output Management**: Handles large MCP tool outputs gracefully
+
+**Configuration Options:**
+```bash
+export MODEL_NAME=gpt-4                    # Target model for token counting
+export MAX_CONTEXT_TOKENS=8192            # Override model default limit  
+export CONTEXT_SAFETY_MARGIN=0.8          # Use 80% of available context
+```
+
+### Prompt Engineering (`prompts/`)
+
+The system uses structured prompt templates that:
+- **Basic Template (`codegen.md`)**: Embeds complete Jira issue information as JSON, includes dynamically generated context instructions, and provides clear requirements for code implementation
+- **Test Generation Template (`codegen_with_tests.md`)**: Enhanced version that additionally focuses on comprehensive test generation including:
+  - Unit tests for individual functions/methods
+  - Integration tests where appropriate
+  - Edge case and error handling tests
+  - Mock tests for external dependencies
+  - Following existing test patterns and pytest conventions
 - Ensures proper testing and repository convention adherence
 
 ## Installation & Setup
@@ -119,19 +141,26 @@ python -m src.main --jira EP-1234 --ado-repo "frontend-app,backend-api"
 - `--ado-project`: Azure DevOps project (defaults to env var)
 - `--ado-repo`: Comma or space-separated list of repositories to analyze
 - `--workspace`: Directory where code changes should be applied (defaults to current directory)
+- `--generate-tests`: Generate comprehensive tests for the requirements in addition to the main implementation
 
 ### Example Workflow
 
-1. **Fetch Jira Issue**: 
+1. **Basic Implementation**: 
    ```bash
    python -m src.main --jira PROJ-123 --ado-repo "web-app,api-service"
    ```
 
-2. **The tool will**:
+2. **Implementation with Test Generation**: 
+   ```bash
+   python -m src.main --jira PROJ-123 --ado-repo "web-app,api-service" --generate-tests
+   ```
+
+3. **The tool will**:
    - Connect to Jira and fetch issue PROJ-123
    - Generate Azure DevOps context for web-app and api-service repositories
    - Create a comprehensive prompt with issue details and repository context
-   - Execute Codex CLI to implement the changes
+   - If `--generate-tests` is specified, use the enhanced prompt template for test generation
+   - Execute Codex CLI to implement the changes (and tests if requested)
    - Apply changes directly to the specified workspace
 
 ## Architecture Benefits
@@ -170,7 +199,8 @@ SweCli/
 │   ├── codex_codegen.py   # Codex CLI integration
 │   └── logging_setup.py   # Advanced logging configuration
 ├── prompts/               # AI prompt templates
-│   └── codegen.md         # Main code generation prompt
+│   ├── codegen.md         # Main code generation prompt
+│   └── codegen_with_tests.md  # Enhanced prompt for test generation
 ├── requirements.txt       # Python dependencies
 ├── codex.config.toml     # MCP server configuration
 └── README.md             # This file

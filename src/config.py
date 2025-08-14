@@ -16,3 +16,8 @@ class Settings:
     ADO_PAT = os.getenv("ADO_PAT")  # for CI
 
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    
+    # Context window management
+    MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4")
+    MAX_CONTEXT_TOKENS = int(os.getenv("MAX_CONTEXT_TOKENS", "0"))  # 0 = use model default
+    CONTEXT_SAFETY_MARGIN = float(os.getenv("CONTEXT_SAFETY_MARGIN", "0.8"))  # Use 80% of context window
