@@ -60,7 +60,7 @@ jobs:
       continue-on-error: true
       
     - name: Upload security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-reports
@@ -139,7 +139,7 @@ jobs:
         fail_ci_if_error: false
         
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION
       with:
         name: coverage-reports
@@ -211,7 +211,7 @@ jobs:
         twine check dist/*
         
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist-packages
         path: dist/
@@ -274,7 +274,7 @@ jobs:
       
     steps:
     - name: Download build artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: dist-packages
         path: dist/
