@@ -52,7 +52,7 @@ MCP Strategy (be selective to avoid token limits):
 **CRITICAL - Context Window Management**:
 - Be highly selective with MCP tool usage
 - Use specific search terms, not broad queries
-- Limit result counts (top=5-10 for lists)
+- Limit result counts
 - Focus on files/modules mentioned in Jira
 - If tools return large outputs, request summaries
 
